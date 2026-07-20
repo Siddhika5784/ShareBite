@@ -4,6 +4,8 @@ import cors from "cors";
 
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import foodRoutes from "./routes/foodRoutes.js";
+
 
 dotenv.config();
 console.log("MONGODB_URI =", process.env.MONGODB_URI);
@@ -31,6 +33,8 @@ const startServer = async () => {
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/foods", foodRoutes);
+
 
 startServer();
 
