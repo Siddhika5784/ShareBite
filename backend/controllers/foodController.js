@@ -1,6 +1,29 @@
+import { Readable } from "stream";
 import Food from "../models/Food.js";
+import cloudinary from "../config/cloudinary.js";
+
+const uploadToCloudinary = async (buffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "ShareBite",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      },
+    );
+
+    const readable = new Readable();
+    readable.push(buffer);
+    readable.push(null);
+    readable.pipe(uploadStream);
+  });
+};
 
 export const createFood = async (req, res) => {
+  
   try {
     const {
       foodName,
@@ -24,12 +47,21 @@ export const createFood = async (req, res) => {
         message: "All fields are required",
       });
     }
+
     if (new Date(expiryTime) <= new Date()) {
-  return res.status(400).json({
-    success: false,
-    message: "Expiry time must be in the future",
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: "Expiry time must be in the future",
+      });
+    }
+
+    let imageUrl = "";
+
+    if (req.file?.buffer) {
+      const uploadResult = await uploadToCloudinary(req.file.buffer);
+      imageUrl = uploadResult.secure_url || uploadResult.url || "";
+    
+    }
 
     const food = await Food.create({
       restaurant: req.user.id,
@@ -39,6 +71,7 @@ export const createFood = async (req, res) => {
       foodType,
       expiryTime,
       pickupAddress,
+      image: imageUrl,
     });
 
     return res.status(201).json({

@@ -153,9 +153,6 @@ export const getRestaurantRequests = async (req, res) => {
   }
 };
 
-import mongoose from "mongoose";
-import Food from "../models/Food.js";
-import Request from "../models/Request.js";
 
 export const acceptRequest = async (req, res) => {
   try {
