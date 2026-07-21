@@ -5,6 +5,8 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import foodRoutes from "./routes/foodRoutes.js";
+import requestRoutes from "./routes/requestRoutes.js";
+
 
 
 dotenv.config();
@@ -34,6 +36,7 @@ const startServer = async () => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/foods", foodRoutes);
+app.use("/api/requests", requestRoutes);
 
 
 startServer();
