@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
+import http from "http";
+import { Server } from "socket.io";
 
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -13,6 +15,32 @@ dotenv.config();
 console.log("MONGODB_URI =", process.env.MONGODB_URI);
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Connected:", socket.id);
+
+  socket.on("joinRoom", (roomId) => {
+    socket.join(roomId);
+
+    console.log("Joined:", roomId);
+  });
+
+  socket.on("sendMessage", (data) => {
+    io.to(data.roomId).emit("receiveMessage", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected:", socket.id);
+  });
+});
 
 // Middleware
 app.use(cors());
@@ -24,7 +52,7 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {

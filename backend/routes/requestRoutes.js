@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post("/", protect, sendRequest);
 
-router.get("/my", protect, getMyRequests);
+router.get("/my-requests", protect, getMyRequests);
 
 router.get("/restaurant", protect, getRestaurantRequests);
 

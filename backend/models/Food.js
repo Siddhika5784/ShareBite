@@ -38,9 +38,21 @@ const foodSchema = new mongoose.Schema(
     },
 
     pickupAddress: {
-      type: String,
-      required: true,
-      trim: true,
+      address: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+
+      latitude: {
+        type: Number,
+        required: true,
+      },
+
+      longitude: { 
+        type: Number,
+        required: true,
+      },
     },
 
     image: {
@@ -56,7 +68,7 @@ const foodSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Food = mongoose.model("Food", foodSchema);

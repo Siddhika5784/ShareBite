@@ -107,7 +107,7 @@ export const getMyRequests = async (req, res) => {
     }
 
     const requests = await Request.find({ ngo: req.user.id })
-      .populate("food", "foodName quantity foodType status")
+      .populate("food", "foodName quantity foodType status pickupAddress")
       .populate("restaurant", "name email phone")
       .sort({ createdAt: -1 });
 

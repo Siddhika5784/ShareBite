@@ -106,6 +106,9 @@ export const getRestaurantDashboard = async (req, res) => {
   }
 };
 export const getNgoDashboard = async (req, res) => {
+  const availableFoods = await Food.countDocuments({
+  status: "Available",
+});
   try {
 
     // Only NGOs
@@ -149,6 +152,7 @@ export const getNgoDashboard = async (req, res) => {
         ngo: ngoId,
         status: "Completed",
       }),
+      
 
     ]);
 
@@ -156,6 +160,7 @@ export const getNgoDashboard = async (req, res) => {
       success: true,
 
       dashboard: {
+        availableFoods,
         totalRequests,
         pendingRequests,
         acceptedRequests,

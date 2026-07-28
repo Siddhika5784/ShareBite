@@ -1,5 +1,5 @@
 import express from "express";
-import { createFood,getFoods ,getFoodById,updateFood,deleteFood} from "../controllers/foodController.js";
+import { createFood,getFoods , getMyFoods,getFoodById,updateFood,deleteFood} from "../controllers/foodController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
@@ -12,8 +12,9 @@ router.post(
     createFood
 );
 router.get("/", protect, getFoods);
+router.get("/my-foods", protect, getMyFoods);
 router.get("/:id", protect, getFoodById);
-router.put("/:id", protect, updateFood);
+router.put("/:id", protect,updateFood);
 router.delete("/:id", protect, deleteFood);
 
 export default router;

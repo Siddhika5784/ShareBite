@@ -23,7 +23,6 @@ const uploadToCloudinary = async (buffer) => {
 };
 
 export const createFood = async (req, res) => {
-  
   try {
     const {
       foodName,
@@ -32,6 +31,8 @@ export const createFood = async (req, res) => {
       foodType,
       expiryTime,
       pickupAddress,
+      latitude,
+      longitude,
     } = req.body;
 
     if (
@@ -40,7 +41,9 @@ export const createFood = async (req, res) => {
       !quantity ||
       !foodType ||
       !expiryTime ||
-      !pickupAddress
+      !pickupAddress ||
+      latitude === undefined ||
+      longitude === undefined
     ) {
       return res.status(400).json({
         success: false,
@@ -60,7 +63,6 @@ export const createFood = async (req, res) => {
     if (req.file?.buffer) {
       const uploadResult = await uploadToCloudinary(req.file.buffer);
       imageUrl = uploadResult.secure_url || uploadResult.url || "";
-    
     }
 
     const food = await Food.create({
@@ -70,7 +72,11 @@ export const createFood = async (req, res) => {
       quantity,
       foodType,
       expiryTime,
-      pickupAddress,
+      pickupAddress: {
+        address: pickupAddress,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+      },
       image: imageUrl,
     });
 
@@ -89,36 +95,52 @@ export const createFood = async (req, res) => {
 
 export const getFoods = async (req, res) => {
   try {
-
-   const foods = await Food.find({
-    status: "Available"
-})
-.sort({ createdAt: -1 })
-.populate("restaurant","name phone address");
+    const foods = await Food.find({
+      status: "Available",
+    })
+      .sort({ createdAt: -1 })
+      .populate("restaurant", "name phone address");
 
     return res.status(200).json({
       success: true,
       count: foods.length,
       foods,
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
+  }
+};
 
+export const getMyFoods = async (req, res) => {
+  try {
+    const foods = await Food.find({
+      restaurant: req.user.id,
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: foods.length,
+      foods,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
 export const getFoodById = async (req, res) => {
   try {
-
     const { id } = req.params;
 
-    const food = await Food.findById(id)
-      .populate("restaurant", "name phone address");
+    const food = await Food.findById(id).populate(
+      "restaurant",
+      "name phone address",
+    );
 
     if (!food) {
       return res.status(404).json({
@@ -131,20 +153,16 @@ export const getFoodById = async (req, res) => {
       success: true,
       food,
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
 export const updateFood = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const food = await Food.findById(id);
@@ -164,23 +182,42 @@ export const updateFood = async (req, res) => {
       });
     }
 
-    const updatedFood = await Food.findByIdAndUpdate(
-      id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const {
+  foodName,
+  description,
+  quantity,
+  foodType,
+  expiryTime,
+  pickupAddress,
+} = req.body;
+
+const updatedFood = await Food.findByIdAndUpdate(
+  id,
+  {
+    foodName,
+    description,
+    quantity,
+    foodType,
+    expiryTime,
+
+  pickupAddress: {
+      address: pickupAddress?.address,
+      latitude: Number(pickupAddress.latitude),
+      longitude: Number(pickupAddress.longitude),
+    },
+  },
+  {
+    new: true,
+    runValidators: true,
+  }
+);
 
     return res.status(200).json({
       success: true,
       message: "Food updated successfully",
       food: updatedFood,
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -190,7 +227,6 @@ export const updateFood = async (req, res) => {
 
 export const deleteFood = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const food = await Food.findById(id);
@@ -216,13 +252,10 @@ export const deleteFood = async (req, res) => {
       success: true,
       message: "Food deleted successfully",
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
