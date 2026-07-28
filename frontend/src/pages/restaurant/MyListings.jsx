@@ -90,7 +90,7 @@ const MyListings = () => {
                 </p>
 
                 <p>
-                  <strong>Pickup:</strong> {food.pickupAddress}
+                  <strong>Pickup:</strong> {food.pickupAddress?.address}
                 </p>
 
                 <div className="flex gap-3 mt-5">

@@ -12,17 +12,57 @@ const AddFood = () => {
     quantity: "",
     foodType: "Veg",
     expiryTime: "",
-    pickupAddress: "",
+    pickupAddress: {
+      address: "",
+      latitude: "",
+      longitude: "",
+    },
   });
 
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "pickupAddress") {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      pickupAddress: {
+        ...formData.pickupAddress,
+        address: value,
+      },
     });
+  } else {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  }
+};
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData((prev) => ({
+          ...prev,
+          pickupAddress: {
+            ...prev.pickupAddress,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+        }));
+
+        toast.success("Location fetched successfully");
+      },
+      () => {
+        toast.error("Unable to fetch location");
+      },
+    );
   };
 
   const handleImageChange = (e) => {
@@ -31,7 +71,14 @@ const AddFood = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+     if (
+    !formData.pickupAddress.latitude ||
+    !formData.pickupAddress.longitude
+  ) {
+    return toast.error(
+      "Please click 'Use Current Location' before adding food."
+    );
+  }
     if (!image) {
       return toast.error("Please select a food image");
     }
@@ -46,7 +93,9 @@ const AddFood = () => {
       data.append("quantity", formData.quantity);
       data.append("foodType", formData.foodType);
       data.append("expiryTime", formData.expiryTime);
-      data.append("pickupAddress", formData.pickupAddress);
+      data.append("pickupAddress", formData.pickupAddress.address);
+      data.append("latitude", formData.pickupAddress.latitude);
+      data.append("longitude", formData.pickupAddress.longitude);
       data.append("image", image);
 
       const res = await api.post("/foods", data);
@@ -59,16 +108,18 @@ const AddFood = () => {
         quantity: "",
         foodType: "Veg",
         expiryTime: "",
-        pickupAddress: "",
+        pickupAddress: {
+          address: "",
+          latitude: "",
+          longitude: "",
+        },
       });
 
       setImage(null);
 
       navigate("/restaurant/my-listings");
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to add food"
-      );
+      toast.error(error.response?.data?.message || "Failed to add food");
     } finally {
       setLoading(false);
     }
@@ -76,18 +127,12 @@ const AddFood = () => {
 
   return (
     <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-xl p-8 mt-6">
-
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Add Food
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Add Food</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-
         {/* Food Name */}
         <div>
-          <label className="block mb-2 font-medium">
-            Food Name
-          </label>
+          <label className="block mb-2 font-medium">Food Name</label>
 
           <input
             type="text"
@@ -102,9 +147,7 @@ const AddFood = () => {
 
         {/* Description */}
         <div>
-          <label className="block mb-2 font-medium">
-            Description
-          </label>
+          <label className="block mb-2 font-medium">Description</label>
 
           <textarea
             name="description"
@@ -119,9 +162,7 @@ const AddFood = () => {
 
         {/* Quantity */}
         <div>
-          <label className="block mb-2 font-medium">
-            Quantity
-          </label>
+          <label className="block mb-2 font-medium">Quantity</label>
 
           <input
             type="text"
@@ -136,9 +177,7 @@ const AddFood = () => {
 
         {/* Food Type */}
         <div>
-          <label className="block mb-2 font-medium">
-            Food Type
-          </label>
+          <label className="block mb-2 font-medium">Food Type</label>
 
           <select
             name="foodType"
@@ -154,9 +193,7 @@ const AddFood = () => {
 
         {/* Expiry Time */}
         <div>
-          <label className="block mb-2 font-medium">
-            Expiry Time
-          </label>
+          <label className="block mb-2 font-medium">Expiry Time</label>
 
           <input
             type="datetime-local"
@@ -170,26 +207,29 @@ const AddFood = () => {
 
         {/* Pickup Address */}
         <div>
-          <label className="block mb-2 font-medium">
-            Pickup Address
-          </label>
+          <label className="block mb-2 font-medium">Pickup Address</label>
 
           <textarea
             name="pickupAddress"
-            value={formData.pickupAddress}
+            value={formData.pickupAddress.address}
             onChange={handleChange}
             rows="3"
             placeholder="Enter pickup location"
             className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-green-500"
             required
           />
+          <button
+            type="button"
+            onClick={getCurrentLocation}
+            className="mt-3 w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+          >
+            📍 Use Current Location
+          </button>
         </div>
 
         {/* Food Image */}
         <div>
-          <label className="block mb-2 font-medium">
-            Food Image
-          </label>
+          <label className="block mb-2 font-medium">Food Image</label>
 
           <input
             type="file"
@@ -208,7 +248,6 @@ const AddFood = () => {
         >
           {loading ? "Adding Food..." : "Add Food"}
         </button>
-
       </form>
     </div>
   );
