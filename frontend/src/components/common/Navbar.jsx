@@ -1,19 +1,26 @@
 import { useAuth } from "../../context/AuthContext";
+import { Menu } from "lucide-react";
 
-const Navbar = () => {
+const Navbar = ({ setIsSidebarOpen }) => {
   const { user } = useAuth();
 
   return (
     <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
       {/* Left */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">
-          Welcome, {user?.name}
-        </h2>
+      <div className="flex items-center gap-4">
+        <button className="md:hidden" onClick={() => setIsSidebarOpen(true)}>
+          <Menu size={28} />
+        </button>
 
-        <p className="text-gray-500 text-sm">
-          Let's reduce food waste together 🌱
-        </p>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Welcome, {user?.name}
+          </h2>
+
+          <p className="text-gray-500 text-sm">
+            Let's reduce food waste together 🌱
+          </p>
+        </div>
       </div>
 
       {/* Right */}

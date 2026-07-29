@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Package, ClipboardList,Clock, CheckCircle,BadgeCheck,XCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import StatCard from "../../components/dashboard/StatCard";
 
 import api from "../../services/api";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -36,7 +37,44 @@ const Dashboard = () => {
     return <LoadingSpinner />;
   }
 
-  const totalFoods = foods.length;
+ const stats = [
+  {
+    title: "Available Foods",
+    value: dashboard?.availableFoods ?? foods.length,
+    color: "text-green-600",
+    icon: Package,
+  },
+  {
+    title: "Total Requests",
+    value: dashboard?.totalRequests || 0,
+    color: "text-blue-600",
+    icon: ClipboardList,
+  },
+  {
+    title: "Pending Requests",
+    value: dashboard?.pendingRequests || 0,
+    color: "text-yellow-500",
+    icon: Clock,
+  },
+  {
+    title: "Accepted Requests",
+    value: dashboard?.acceptedRequests || 0,
+    color: "text-green-600",
+    icon: CheckCircle,
+  },
+  {
+    title: "Rejected Requests",
+    value: dashboard?.rejectedRequests || 0,
+    color: "text-red-600",
+    icon: XCircle,
+  },
+  {
+    title: "Completed Requests",
+    value: dashboard?.completedRequests || 0,
+    color: "text-purple-600",
+    icon: BadgeCheck,
+  },
+];
 
   return (
     <div className="p-6">
@@ -47,105 +85,19 @@ const Dashboard = () => {
 
       {/* Stats */}
 
-      <div className="grid md:grid-cols-3 gap-6">
+<div className="grid md:grid-cols-3 gap-6">
 
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">
-                Available Foods
-              </p>
+  {stats.map((stat) => (
+    <StatCard
+      key={stat.title}
+      title={stat.title}
+      value={stat.value}
+      color={stat.color}
+      icon={stat.icon}
+    />
+  ))}
 
-              <h2 className="text-3xl font-bold mt-2">
-                {dashboard?.availableFoods ?? foods.length}
-              </h2>
-            </div>
-
-            <Package className="text-green-600" size={40} />
-          </div>
-        </div>
-
-         <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">
-                Total Requests
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {dashboard?.totalRequests || 0}
-              </h2>
-            </div>
-
-            <ClipboardList className="text-blue-600" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">
-                Pending Requests
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {dashboard?.pendingRequests || 0}
-              </h2>
-            </div>
-
-            <Clock className="text-yellow-500" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">
-                Accepted Requests
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {dashboard?.acceptedRequests || 0}
-              </h2>
-            </div>
-
-            <CheckCircle className="text-green-600" size={40} />
-          </div>
-        </div>
-
-         <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">
-                Rejected Requests
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {dashboard?.rejectedRequests || 0}
-              </h2>
-            </div>
-
-            <XCircle className="text-red-600" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">
-                Completed Requests
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {dashboard?.completedRequests || 0}
-              </h2>
-            </div>
-
-            <BadgeCheck className="text-purple-600" size={40} />
-          </div>
-        </div>
-
-      </div>
+</div>
 
       {/* Recent Food Listings */}
 

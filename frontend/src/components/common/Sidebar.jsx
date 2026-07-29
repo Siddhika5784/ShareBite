@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const Sidebar = () => {
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -62,7 +62,10 @@ const Sidebar = () => {
   const links = user?.role === "restaurant" ? restaurantLinks : ngoLinks;
 
   return (
-    <div className="w-64 bg-green-700 text-white flex flex-col justify-between">
+    <div
+      className={`fixed md:static top-0 left-0 z-50 h-full w-64 bg-green-700 text-white flex flex-col justify-between transform transition-transform duration-300
+  ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+    >
       <div>
         <h1 className="text-2xl font-bold p-6 border-b border-green-600">
           ShareBite
@@ -73,6 +76,7 @@ const Sidebar = () => {
             <NavLink
               key={link.path}
               to={link.path}
+               onClick={() => setIsSidebarOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                   isActive

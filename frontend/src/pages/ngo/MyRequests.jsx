@@ -93,13 +93,6 @@ const MyRequests = () => {
               </div>
 
               <div className="mt-5 flex gap-3">
-                <Link
-                  to={`/ngo/request/${request._id}`}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  View Details
-                </Link>
-
                 {request.status === "Accepted" && (
                   <>
                     <button
