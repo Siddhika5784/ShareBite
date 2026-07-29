@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { Link } from "react-router-dom";
 
 const Requests = () => {
   const [requests, setRequests] = useState([]);
@@ -16,9 +17,7 @@ const Requests = () => {
       const res = await api.get("/requests/restaurant");
       setRequests(res.data.requests);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to fetch requests"
-      );
+      toast.error(error.response?.data?.message || "Failed to fetch requests");
     } finally {
       setLoading(false);
     }
@@ -64,26 +63,18 @@ const Requests = () => {
 
   return (
     <div className="p-6">
-
-      <h1 className="text-3xl font-bold mb-6">
-        Food Requests
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Food Requests</h1>
 
       {requests.length === 0 ? (
         <p>No requests found.</p>
       ) : (
         <div className="space-y-6">
-
           {requests.map((request) => (
-
             <div
               key={request._id}
               className="bg-white rounded-xl shadow-md p-6"
             >
-
-              <h2 className="text-xl font-bold">
-                {request.food.foodName}
-              </h2>
+              <h2 className="text-xl font-bold">{request.food.foodName}</h2>
 
               <p>
                 <strong>NGO :</strong> {request.ngo.name}
@@ -110,12 +101,10 @@ const Requests = () => {
               </p>
 
               <p>
-                <strong>Message :</strong>{" "}
-                {request.message || "No message"}
+                <strong>Message :</strong> {request.message || "No message"}
               </p>
 
               <div className="flex gap-3 mt-5">
-
                 {request.status === "Pending" && (
                   <>
                     <button
@@ -135,12 +124,21 @@ const Requests = () => {
                 )}
 
                 {request.status === "Accepted" && (
-                  <button
-                    onClick={() => handleComplete(request._id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Complete Pickup
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleComplete(request._id)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      Complete Pickup
+                    </button>
+
+                    <Link
+                      to={`/chat/${request._id}`}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                    >
+                      💬 Chat
+                    </Link>
+                  </>
                 )}
 
                 {request.status === "Rejected" && (
@@ -154,16 +152,11 @@ const Requests = () => {
                     Pickup Completed ✅
                   </span>
                 )}
-
               </div>
-
             </div>
-
           ))}
-
         </div>
       )}
-
     </div>
   );
 };

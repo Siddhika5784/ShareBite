@@ -16,6 +16,9 @@ import Dahboard from "./pages/ngo/Dashboard";
 import AvailableFoods from "./pages/ngo/AvailableFoods";
 import MyRequests from "./pages/ngo/MyRequests";
 import RequestDetails from "./pages/ngo/RequestDetails";
+
+import Chat from "./pages/chat/Chat";
+
 function App() {
   return (
     <Routes>
@@ -42,6 +45,7 @@ function App() {
         <Route path="/ngo/available-food" element={<AvailableFoods />} />
         <Route path="/ngo/my-requests" element={<MyRequests />} />
         <Route path="/ngo/request/:id" element={<RequestDetails />} />
+        <Route path="/chat/:requestId" element={<Chat />} />
       </Route>
     </Routes>
   );

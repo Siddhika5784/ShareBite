@@ -101,17 +101,26 @@ const MyRequests = () => {
                 </Link>
 
                 {request.status === "Accepted" && (
-                  <button
-                    onClick={() =>
-                      window.open(
-                        `https://www.google.com/maps?q=${request.food?.pickupAddress?.latitude},${request.food?.pickupAddress?.longitude}`,
-                        "_blank",
-                      )
-                    }
-                    className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700"
-                  >
-                    📍 Open Map
-                  </button>
+                  <>
+                    <button
+                      onClick={() =>
+                        window.open(
+                          `https://www.google.com/maps?q=${request.food?.pickupAddress?.latitude},${request.food?.pickupAddress?.longitude}`,
+                          "_blank",
+                        )
+                      }
+                      className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700"
+                    >
+                      📍 Open Map
+                    </button>
+
+                    <Link
+                      to={`/chat/${request._id}`}
+                      className="bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700"
+                    >
+                      💬 Chat
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
