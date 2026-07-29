@@ -3,45 +3,22 @@ import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
 import http from "http";
-import { Server } from "socket.io";
+import { initializeSocket } from "./socket.js";
+
 
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import foodRoutes from "./routes/foodRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
 console.log("MONGODB_URI =", process.env.MONGODB_URI);
 
 const app = express();
 const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("Connected:", socket.id);
-
-  socket.on("joinRoom", (roomId) => {
-    socket.join(roomId);
-
-    console.log("Joined:", roomId);
-  });
-
-  socket.on("sendMessage", (data) => {
-    io.to(data.roomId).emit("receiveMessage", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Disconnected:", socket.id);
-  });
-});
-
+initializeSocket(server);
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -65,6 +42,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
