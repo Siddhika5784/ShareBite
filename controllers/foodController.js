@@ -1,0 +1,261 @@
+import { Readable } from "stream";
+import Food from "../models/Food.js";
+import cloudinary from "../config/cloudinary.js";
+
+const uploadToCloudinary = async (buffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "ShareBite",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      },
+    );
+
+    const readable = new Readable();
+    readable.push(buffer);
+    readable.push(null);
+    readable.pipe(uploadStream);
+  });
+};
+
+export const createFood = async (req, res) => {
+  try {
+    const {
+      foodName,
+      description,
+      quantity,
+      foodType,
+      expiryTime,
+      pickupAddress,
+      latitude,
+      longitude,
+    } = req.body;
+
+    if (
+      !foodName ||
+      !description ||
+      !quantity ||
+      !foodType ||
+      !expiryTime ||
+      !pickupAddress ||
+      latitude === undefined ||
+      longitude === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (new Date(expiryTime) <= new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Expiry time must be in the future",
+      });
+    }
+
+    let imageUrl = "";
+
+    if (req.file?.buffer) {
+      const uploadResult = await uploadToCloudinary(req.file.buffer);
+      imageUrl = uploadResult.secure_url || uploadResult.url || "";
+    }
+
+    const food = await Food.create({
+      restaurant: req.user.id,
+      foodName,
+      description,
+      quantity,
+      foodType,
+      expiryTime,
+      pickupAddress: {
+        address: pickupAddress,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+      },
+      image: imageUrl,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Food added successfully",
+      food,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getFoods = async (req, res) => {
+  try {
+    const foods = await Food.find({
+      status: "Available",
+    })
+      .sort({ createdAt: -1 })
+      .populate("restaurant", "name phone address");
+
+    return res.status(200).json({
+      success: true,
+      count: foods.length,
+      foods,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getMyFoods = async (req, res) => {
+  try {
+    const foods = await Food.find({
+      restaurant: req.user.id,
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: foods.length,
+      foods,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getFoodById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const food = await Food.findById(id).populate(
+      "restaurant",
+      "name phone address",
+    );
+
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      food,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateFood = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const food = await Food.findById(id);
+
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food not found",
+      });
+    }
+
+    // Check ownership
+    if (food.restaurant.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to update this food",
+      });
+    }
+
+    const {
+  foodName,
+  description,
+  quantity,
+  foodType,
+  expiryTime,
+  pickupAddress,
+} = req.body;
+
+const updatedFood = await Food.findByIdAndUpdate(
+  id,
+  {
+    foodName,
+    description,
+    quantity,
+    foodType,
+    expiryTime,
+
+  pickupAddress: {
+      address: pickupAddress?.address,
+      latitude: Number(pickupAddress.latitude),
+      longitude: Number(pickupAddress.longitude),
+    },
+  },
+  {
+    new: true,
+    runValidators: true,
+  }
+);
+
+    return res.status(200).json({
+      success: true,
+      message: "Food updated successfully",
+      food: updatedFood,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteFood = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const food = await Food.findById(id);
+
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food not found",
+      });
+    }
+
+    // Check ownership
+    if (food.restaurant.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this food",
+      });
+    }
+
+    await food.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Food deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
