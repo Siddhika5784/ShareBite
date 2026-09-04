@@ -3,7 +3,6 @@ import Request from "../models/Request.js";
 
 export const getRestaurantDashboard = async (req, res) => {
   try {
-
     // Only Restaurant
     if (req.user.role !== "restaurant") {
       return res.status(403).json({
@@ -20,13 +19,7 @@ export const getRestaurantDashboard = async (req, res) => {
       requestedFoods,
       pickedUpFoods,
       expiredFoods,
-      totalRequests,
-      pendingRequests,
-      acceptedRequests,
-      rejectedRequests,
-      completedRequests,
     ] = await Promise.all([
-
       Food.countDocuments({
         restaurant: restaurantId,
       }),
@@ -50,31 +43,6 @@ export const getRestaurantDashboard = async (req, res) => {
         restaurant: restaurantId,
         status: "Expired",
       }),
-
-      Request.countDocuments({
-        restaurant: restaurantId,
-      }),
-
-      Request.countDocuments({
-        restaurant: restaurantId,
-        status: "Pending",
-      }),
-
-      Request.countDocuments({
-        restaurant: restaurantId,
-        status: "Accepted",
-      }),
-
-      Request.countDocuments({
-        restaurant: restaurantId,
-        status: "Rejected",
-      }),
-
-      Request.countDocuments({
-        restaurant: restaurantId,
-        status: "Completed",
-      }),
-
     ]);
 
     return res.status(200).json({
@@ -86,30 +54,20 @@ export const getRestaurantDashboard = async (req, res) => {
         requestedFoods,
         pickedUpFoods,
         expiredFoods,
-
-        totalRequests,
-        pendingRequests,
-        acceptedRequests,
-        rejectedRequests,
-        completedRequests,
       },
-
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 export const getNgoDashboard = async (req, res) => {
-  const availableFoods = await Food.countDocuments({
-  status: "Available",
-});
   try {
+    const availableFoods = await Food.countDocuments({
+      status: "Available",
+    });
 
     // Only NGOs
     if (req.user.role !== "ngo") {
@@ -128,7 +86,6 @@ export const getNgoDashboard = async (req, res) => {
       rejectedRequests,
       completedRequests,
     ] = await Promise.all([
-
       Request.countDocuments({
         ngo: ngoId,
       }),
@@ -152,8 +109,6 @@ export const getNgoDashboard = async (req, res) => {
         ngo: ngoId,
         status: "Completed",
       }),
-      
-
     ]);
 
     return res.status(200).json({
@@ -167,15 +122,11 @@ export const getNgoDashboard = async (req, res) => {
         rejectedRequests,
         completedRequests,
       },
-
     });
-
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };

@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["restaurant", "ngo", "admin"],
+      enum: ["restaurant", "ngo"],
       required: true,
     },
 
@@ -44,11 +44,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
-    },
-
-    profileImage: {
-      type: String,
-      default: "",
     },
 
     location: {

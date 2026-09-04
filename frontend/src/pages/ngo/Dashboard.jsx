@@ -40,7 +40,7 @@ const Dashboard = () => {
  const stats = [
   {
     title: "Available Foods",
-    value: dashboard?.availableFoods ?? foods.length,
+    value: dashboard?.availableFoods || 0,
     color: "text-green-600",
     icon: Package,
   },

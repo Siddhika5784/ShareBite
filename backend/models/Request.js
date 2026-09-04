@@ -37,5 +37,10 @@ const requestSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+// Prevent same NGO from requesting same food more than once
+requestSchema.index(
+  { food: 1, ngo: 1 },
+  { unique: true }
+);
 
 export default mongoose.model("Request", requestSchema);

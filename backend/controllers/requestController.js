@@ -89,6 +89,14 @@ export const sendRequest = async (req, res) => {
       request,
     });
   } catch (error) {
+    // Duplicate request
+  if (error.code === 11000) {
+    return res.status(400).json({
+      success: false,
+      message: "You already requested this food",
+    });
+  }
+  
     return res.status(500).json({
       success: false,
 
@@ -174,35 +182,30 @@ export const acceptRequest = async (req, res) => {
       });
     }
 
-    // Find Request
-    const request = await Request.findById(id);
+    // Atomically accept only if request is still Pending
+    const request = await Request.findOneAndUpdate(
+      {
+        _id: id,
+        restaurant: req.user.id,
+        status: "Pending",
+      },
+      {
+        $set: {
+          status: "Accepted",
+        },
+      },
+      {
+        new: true,
+      }
+    );
 
+    // Request was already processed
     if (!request) {
-      return res.status(404).json({
-        success: false,
-        message: "Request not found",
-      });
-    }
-
-    // Check ownership
-    if (request.restaurant.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to accept this request",
-      });
-    }
-
-    // Request must be pending
-    if (request.status !== "Pending") {
       return res.status(400).json({
         success: false,
-        message: "Request has already been processed",
+        message: "Request is already processed or not found",
       });
     }
-
-    // Accept current request
-    request.status = "Accepted";
-    await request.save();
 
     // Reject all other pending requests for the same food
     await Request.updateMany(
@@ -218,14 +221,12 @@ export const acceptRequest = async (req, res) => {
       }
     );
 
-    // Keep Food status as "Requested"
-    // It will change to "Picked Up" in the Complete Request API.
-
     return res.status(200).json({
       success: true,
       message: "Request accepted successfully",
       request,
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,

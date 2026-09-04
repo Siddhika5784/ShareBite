@@ -17,7 +17,11 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    socket.connect();
+    socket.auth = {
+  token: localStorage.getItem("token"),
+};
+
+socket.connect();
 
     socket.emit("joinRoom", requestId);
 
@@ -71,7 +75,7 @@ const Chat = () => {
             const senderId =
               typeof msg.sender === "object" ? msg.sender._id : msg.sender;
 
-            const isMe = msg.sender === user.id;
+            const isMe = senderId === user.id;
 
             return (
               <div
