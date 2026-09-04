@@ -96,21 +96,13 @@ export const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         // Validation
-        if (!email) {
+        if (!email || !password) {
     return res.status(400).json({
         success: false,
-        message: "Email is required",
+        message: "Email and password are required",
     });
 }
-
-if (!password) {
-    return res.status(400).json({
-        success: false,
-        message: "Password is required",
-    });
-}
-
-        // Find User
+ // Find User
 const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({

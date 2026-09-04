@@ -14,7 +14,6 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
-console.log("MONGODB_URI =", process.env.MONGODB_URI);
 
 const app = express();
 const server = http.createServer(app);
