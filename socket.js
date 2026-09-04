@@ -1,5 +1,7 @@
 import { Server } from "socket.io";
 import Message from "./models/Message.js";
+import socketAuth from "./middleware/socketAuth.js";
+import Request from "./models/Request.js";
 
 let io;
 
@@ -10,6 +12,8 @@ export const initializeSocket = (server) => {
       methods: ["GET", "POST"],
     },
   });
+
+  io.use(socketAuth);
 
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
@@ -23,7 +27,7 @@ export const initializeSocket = (server) => {
       try {
         const newMessage = await Message.create({
           roomId: data.roomId,
-          sender: data.sender,
+          sender: socket.data.user.id,
           message: data.message,
         });
 
