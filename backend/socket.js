@@ -8,7 +8,7 @@ let io;
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: "https://share-bite-iota.vercel.app/",
       methods: ["GET", "POST"],
     },
   });
